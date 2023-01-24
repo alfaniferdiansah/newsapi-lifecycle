@@ -1,148 +1,91 @@
-import React from 'react'
+import React, { Component } from 'react';
+import axios from 'axios';
 
-class Body extends React.Component {
-    constructor(props){
-        super(props);
-        this.state = {
-            searchFrom: document.querySelector('.search'),
-            input: document.querySelector('.input'),
-            newsList: document.querySelector('.news-list')
-        }
-        console.log('constructor')
+class Body extends Component {
+  state = {
+    news: [],
+    searchTerm: '',
+  }
+
+  constructor(props) {
+    super(props);
+    console.log('constructor');
+  }
+
+  componentDidMount() {
+    console.log('component DidMount')
+    const apiKey = '1d43adec9e5c4a508292f5dfb1ffe7bd';
+    const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+
+    axios.get(url)
+      .then(res => {
+        this.setState({ news: res.data.articles });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  componentDidUpdate() {
+    console.log('component didUpdate');
+  }
+
+  componentWillUnmount() {
+    console.log('component willUnmount');
+  }
+
+  handleChange = (e) => {
+    this.setState({ searchTerm: e.target.value });
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    if (!this.state.searchTerm) {
+        alert('Field is empty! Please fill the field');
     }
 
-    static getDerivedStateFromProps (props, state){
-        console.log('getDerivedStateFromProps')
-        return null;
-    }
+    const apiKey = '1d43adec9e5c4a508292f5dfb1ffe7bd';
+    const url = `https://newsapi.org/v2/everything?q=${this.state.searchTerm}&apiKey=${apiKey}`;
 
-    componentDidMount () {
-        console.log('componentDidMount')
-        setTimeout(() => {
-            this.setState({
-            retrieve: searchFrom.addEventListener('submit')
-            })
-        }, 5000);
-    }
+    axios.get(url)
+      .then(res => {
+        this.setState({ news: res.data.articles });
+        console.log({ news: res.data.articles });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
 
-    validate() {
-        function retrieve(e){
-            if (input.value == ''){
-                alert('input field is empty! Please fill the field')
-            }
+  render() {
+    console.log('rendered');
+    return (
+        <div className="container-fluid">
+		    <div className="row d-flex justify-content-center mr-4">
+                <form
+                    className="input-group mb-4 mt-4 search" 
+                    onSubmit={this.handleSubmit}>
+                    <input className="form-control input" type="text" value={this.state.searchTerm} onChange={this.handleChange} />
+                    <button 
+                        className="btn btn-primary"
+                        type="submit">Go</button>
+                </form>
+            </div>
 
-            newsList.innerHTML = ''
-
-            e.preventDefault()
-
-            const apiKey = '1d43adec9e5c4a508292f5dfb1ffe7bd'
-            let topic = input.value;
-            let url = `https://newsapi.org/v2/everything?q=${topic}&apiKey=${apiKey}`
-            
-            const getNews = fetch(url)
-            getNews
-                .then((res)=>{return res.json()})
-                .then((data)=>{
-                console.log(data)
-                    data.articles.forEach(article => {
-                        let li = document.createElement('li');
-                        let a = document.createElement('a');
-                        a.setAttribute('href', article.url);
-                        a.setAttribute('target', '_blank');
-                        li.appendChild(a);
-                        newsList.appendChild(li);
-                        a.textContent = article.title;
-                    });
-                }).catch((error)=>{
-                    console.log(error)
-                })
-        }
-    }
-
-    shouldComponentUpdate (nextProps, nextState) {
-        console.log('shouldComponentUpdate')
-        return true;
-    }
-
-    getSnapshotBeforeUpdate (prevProps, prevState) {
-        console.log('getSnapshotBeforeUpdate')
-        return null;
-    }
-
-    componentDidUpdate (prevProps, prevState, snapshot) {
-        console.log('componentDidUpdate')
-    }
-
-    render(){
-        console.log('render')
-        return(
-            <div className="container-fluid">
-		<div className="row d-flex justify-content-center mr-4">
-            <form className="input-group mb-3 mt-4 search">
-                <input type="text" className="form-control input" placeholder="Search"/>
-                <button className="btn btn-primary" type="submit">Go</button>
-            </form>
-        </div>
-            <table className="table">
-                <tbody className="news-list" />     
-            </table>
-    </div>
-        )
-    }
+        {this.state.news.map((article, index) => (
+          <div className="text-center mt-3" key={index}>
+            <img style={{widht:'200px', height:'100px'}} src={article.urlToImage} alt="news" />
+            <h2>{article.title}</h2>
+            <p>{article.description}</p>
+            <a href={article.url}>Read More</a>
+          </div>
+        ))}
+      </div>
+    );
+  }
 }
 
+export default Body;
 
-        // const searchFrom = document.querySelector('.search');
-        // const input = document.querySelector('.input');
-        // const newsList = document.querySelector('.news-list');
 
-        // searchFrom.addEventListener('submit', retrieve)
 
-        // function retrieve(e){
-        //     if (input.value == ''){
-        //         alert('input field is empty! Please fill the field')
-        //     }
-
-        //     newsList.innerHTML = ''
-
-        //     e.preventDefault()
-
-        //     const apiKey = '1d43adec9e5c4a508292f5dfb1ffe7bd'
-        //     let topic = input.value;
-        //     let url = `https://newsapi.org/v2/everything?q=${topic}&apiKey=${apiKey}`
-            
-        //     const getNews = fetch(url)
-        //     getNews
-        //         .then((res)=>{return res.json()})
-        //         .then((data)=>{
-        //         console.log(data)
-        //             data.articles.forEach(article => {
-        //                 let li = document.createElement('li');
-        //                 let a = document.createElement('a');
-        //                 a.setAttribute('href', article.url);
-        //                 a.setAttribute('target', '_blank');
-        //                 li.appendChild(a);
-        //                 newsList.appendChild(li);
-        //                 a.textContent = article.title;
-        //             });
-        //         }).catch((error)=>{
-        //             console.log(error)
-        //         })
-        // }
-//   return (
-//     <div className="container-fluid">
-// 		<div className="row d-flex justify-content-center mr-4">
-//             <form className="input-group mb-3 mt-4 search">
-//                 <input type="text" className="form-control input" placeholder="Search"/>
-//                 <button className="btn btn-primary" type="submit">Go</button>
-//             </form>
-//         </div>
-//             <table className="table">
-//                 <tr className="news-list">     
-//                 </tr>
-//             </table>
-//     </div>
-//   )
-// }
-
-export default Body
